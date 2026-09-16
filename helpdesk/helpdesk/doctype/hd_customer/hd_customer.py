@@ -395,13 +395,7 @@ class HDCustomer(Document):
         )
         erp_doc.flags.ignore_erpnext_sync = True
         erp_doc.insert(ignore_permissions=True)
-        frappe.db.set_value(
-            "HD Customer",
-            self.name,
-            "erpnext_customer",
-            erp_doc.name,
-            update_modified=False,
-        )
+        frappe.db.set_value("HD Customer", self.name, "erpnext_customer", erp_doc.name)
 
     def on_update(self):
         if not should_sync_with_erpnext() or self.flags.get("ignore_erpnext_sync"):

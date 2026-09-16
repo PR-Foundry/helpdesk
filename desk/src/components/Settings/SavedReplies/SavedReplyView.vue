@@ -55,7 +55,7 @@
           </div>
           <div class="space-y-1.5">
             <Select
-              :label="__('Visibility')"
+              label="Scope"
               v-model="savedReplyData.scope"
               :options="scopeDropdownOptions"
               required

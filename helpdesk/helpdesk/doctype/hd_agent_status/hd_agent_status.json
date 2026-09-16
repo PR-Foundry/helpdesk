@@ -8,7 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "agent_status",
-  "enabled",
+  "enable",
   "category",
   "section_break_jqvx",
   "color",
@@ -52,9 +52,9 @@
   },
   {
    "default": "1",
-   "fieldname": "enabled",
+   "fieldname": "enable",
    "fieldtype": "Check",
-   "label": "Enabled"
+   "label": "Enable"
   }
  ],
  "grid_page_length": 50,

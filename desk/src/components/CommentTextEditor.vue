@@ -99,7 +99,6 @@ import { AttachmentIcon } from "@/components/icons/";
 import { useTyping } from "@/composables/realtime";
 import { useAgentStore } from "@/stores/agent";
 import { useAuthStore } from "@/stores/auth";
-import { capture } from "@/telemetry";
 import {
   getFontFamily,
   isContentEmpty,
@@ -179,7 +178,6 @@ async function submitComment() {
       },
     }),
     onSuccess: () => {
-      capture("comment_added");
       if (isManager) {
         updateOnboardingStep("comment_on_ticket");
       }

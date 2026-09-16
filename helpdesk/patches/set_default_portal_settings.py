@@ -1,9 +1,15 @@
-from helpdesk.setup.install import set_portal_defaults
+import frappe
 
 
 def execute():
-    """Set the portal's default role and home page for helpdesk.
+    portal_settings = frappe.get_single("Portal Settings")
 
-    Safe to re-run: only fills values that are still empty.
-    """
-    set_portal_defaults()
+    defaults = {
+        "default_role": "HD Customer",
+        "default_portal_home": "/helpdesk",
+    }
+    for field, value in defaults.items():
+        if not portal_settings.get(field):
+            portal_settings.set(field, value)
+
+    portal_settings.save()

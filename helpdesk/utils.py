@@ -51,14 +51,12 @@ def is_agent(user: str | None = None) -> bool:
     :return: Whether `user` is an agent
     """
     user = user or frappe.session.user
-    if is_admin(user):
-        return True
-    # a deactivated agent keeps their roles; the record decides when there is one
-    active = frappe.db.get_value("HD Agent", user, "is_active")
-    if active is not None:
-        return bool(active)
-    roles = frappe.get_roles(user)
-    return "Agent Manager" in roles or "Agent" in roles
+    return (
+        is_admin()
+        or "Agent Manager" in frappe.get_roles(user)
+        or "Agent" in frappe.get_roles(user)
+        or bool(frappe.db.exists("HD Agent", {"name": user}))
+    )
 
 
 def get_agent_name(user: str = None) -> str | None:

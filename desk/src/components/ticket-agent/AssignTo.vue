@@ -173,6 +173,7 @@ import { useUserStore } from "@/stores/user";
 import { capture } from "@/telemetry";
 import { __ } from "@/translation";
 import {
+  ActivitiesSymbol,
   AgentOption,
   AssigneeSymbol,
   LocalAssignee,
@@ -186,6 +187,7 @@ import {
   Popover,
   TextInput,
   Tooltip,
+  call,
   createListResource,
   createResource,
   dayjsLocal,
@@ -210,6 +212,7 @@ const { hideLabel, ghost } = props;
 // just reports its selection through v-model and the parent decides what to do.
 const ticket = inject(TicketSymbol, null);
 const assignees = inject(AssigneeSymbol, null);
+const activities = inject(ActivitiesSymbol, null);
 const selection = defineModel<string[]>({ default: () => [] });
 
 // On a ticket the trigger reports state ("No one" is assigned); standalone it is
@@ -512,6 +515,16 @@ watch(searchText, () => {
   highlightedIndex.value = 0;
 });
 
+async function logActivity(action: string) {
+  await call("frappe.client.insert", {
+    doc: {
+      doctype: "HD Ticket Activity",
+      ticket: ticket?.value?.name,
+      action,
+    },
+  });
+}
+
 // triggered when the popover is closed
 const addAssigneesResource = createResource({
   url: "frappe.desk.form.assign_to.add",
@@ -576,7 +589,11 @@ async function saveAssignees(added: string[], removed: string[]) {
       if (addResult?.exc) throw new Error(addResult.exc);
     }
 
-    // core assign_to writes the timeline entry itself
+    // Log activity only after API calls succeed
+    const logParts: string[] = [];
+    if (added.length) logParts.push(`assigned ${added.join(", ")}`);
+    if (removed.length) logParts.push(`unassigned ${removed.join(", ")}`);
+    await logActivity(logParts.join(" & "));
 
     // Delay the success toast when warnings were shown so they land first.
     const successDelay = hasUnavailable ? 1000 : 0;
@@ -585,6 +602,7 @@ async function saveAssignees(added: string[], removed: string[]) {
     }, successDelay);
 
     assignees?.value.reload();
+    activities?.value.reload();
   } catch {
     toast.error(__("Failed to update Assignees."));
     localAssignees.value = [...snapshotAssignees.value];
